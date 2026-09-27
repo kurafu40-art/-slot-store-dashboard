@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>北斗の拳 転生2 モード判別・共有</title><style>
+:root{--bg:#0b0f14;--panel:#111823;--panel2:#17202c;--line:#293546;--text:#eef4fb;--muted:#9aabc0;--good:#34d399;--warn:#fbbf24;--bad:#fb7185;--info:#60a5fa;--accent:#8b5cf6}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 12px;border-radius:10px}
+button.primary{background:var(--accent);border-color:transparent}button.good{background:#123a2f;border-color:#1d6c55}button.warn{background:#4b3812;border-color:#7f611b}button.danger{background:#4a1d29;border-color:#7b2c40}
+input,select,textarea{background:#0f1620;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;width:100%}
+body{padding-bottom:40px}.app{max-width:1180px;margin:auto;padding:12px}.top{position:sticky;top:0;z-index:20;background:rgba(11,15,20,.95);backdrop-filter:blur(12px);padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0 auto 0 0}h2,h3{margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}.span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:130px}.field label,.muted{font-size:12px;color:var(--muted)}hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:#0f1620}.badge.info{color:#b8d6ff;border-color:#355f91}.badge.warn{color:#ffe08a;border-color:#755b20}.badge.good{color:#9ff0ce;border-color:#285c4d}.badge.bad{color:#ffadbb;border-color:#784052}
+.big{font-size:23px;font-weight:800}.empty{padding:20px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:720px}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}th{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#f8fafc;color:#111827;padding:10px 14px;border-radius:999px;display:none;z-index:100;font-weight:700}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:650px;width:calc(100% - 24px)}dialog::backdrop{background:rgba(0,0,0,.6)}
+@media(max-width:820px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.top h1{width:100%}}
+
+.statusBoard{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:9px}.machine{border-radius:14px;padding:12px;border:2px solid var(--line);min-height:130px;background:#fff;color:#111}.machine.red{background:#7f1d1d;color:#fff;border-color:#fb7185}.machine.black{background:#050505;color:#fff;border-color:#374151}.machine.white{background:#fff;color:#111;border-color:#d1d5db}.machine .no{font-size:22px;font-weight:900}.machine .sub{font-size:12px;opacity:.8;margin-top:4px}.machine .tag{display:inline-block;margin-top:8px;padding:4px 7px;border-radius:999px;border:1px solid currentColor;font-size:12px}.judge{padding:12px;border-radius:12px;border:1px solid var(--line);background:#0f1620;margin-top:10px}.judge.red{border-color:#7f1d1d}.judge.white{border-color:#64748b}.actionBtns{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.btnRed{background:#7f1d1d;border-color:#fb7185}.btnBlack{background:#050505;border-color:#4b5563}.btnWhite{background:#fff;color:#111;border-color:#d1d5db}.btnHit{background:#1e3a8a;border-color:#60a5fa}@media(max-width:700px){.statusBoard{grid-template-columns:repeat(2,minmax(130px,1fr))}.actionBtns{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<div class="app">
+  <div class="top"><h1>北斗の拳 転生2　モード判別・共有</h1><span id="syncBadge" class="badge">端末内保存</span><button onclick="window.close()">閉じる</button></div>
+  <div class="grid">
+    <div class="card span5">
+      <h2>判別・送信</h2><div class="muted">設定・媒体・店舗傾向分析には使用せず、12時間の一時共有だけに使います。</div><hr>
+      <div class="field"><label>店舗</label><select id="store"></select></div>
+      <div class="row" style="margin-top:8px"><div class="field"><label>台番号</label><input id="machineNo" inputmode="numeric" placeholder="例：812"></div><div class="field"><label>前兆が来たあべし数（1〜512）</label><input id="abeshi" type="number" min="1" max="512" placeholder="例：289"></div></div>
+      <div id="judge" class="judge white"><strong>あべし数を入力すると判定します。</strong></div>
+      <div class="field" style="margin-top:8px"><label>確認者（任意）</label><input id="who" placeholder="例：A"></div>
+      <div class="field" style="margin-top:8px"><label>メモ（任意）</label><input id="memo" placeholder="CZで確認できず、など"></div><hr>
+      <div class="actionBtns"><button id="sendAuto" class="primary">あべし判定で共有</button><button id="sendRed" class="btnRed">赤：シャッターあり</button><button id="sendBlack" class="btnBlack">黒：シャッターなし</button><button id="sendWhite" class="btnWhite">白：要確認</button></div>
+      <button id="hit" class="btnHit" style="width:100%;margin-top:8px">当たり報告 → 白（要確認）へリセット</button>
+      <div class="muted" style="margin-top:8px">明示的に「なし」を送信した場合は512あべしまで黒として扱います。CZなどで確認不能・未確認は白のままです。</div>
+    </div>
+    <div class="card span7"><div class="row" style="justify-content:space-between"><div><h2>現在の共有状況</h2><div class="muted">最終入力・編集から12時間で自動削除</div></div><span class="badge warn">一時情報</span></div><hr><div id="board" class="statusBoard"></div></div>
+    <div class="card span12">
+      <h2>判定ルール</h2>
+      <div class="muted">前兆発生あべしが「モードAでは発生しない区間」に入った場合のみA以外として赤へ自動判定します。それ以外は断定せず白（要確認）とします。手動送信は自動判定より優先します。</div>
+      <div class="row" style="margin-top:8px"><span class="badge bad">1〜64</span><span class="badge bad">129〜192</span><span class="badge bad">257〜320</span><span class="badge bad">385〜512</span><span class="muted">→ 前兆発生でA以外扱い / 赤</span></div>
+      <div class="muted" style="margin-top:8px">321〜384など、Aを完全否定できない区間は自動では白（要確認）にします。</div>
+    </div>
+  </div>
+</div><div id="toast" class="toast"></div>
+<script>
+const KEY='slotStoreDashboard_v1',FBKEY='slotStoreFirebase_v1',TTL=12*60*60*1000;
+const $=id=>document.getElementById(id),uid=()=>Math.random().toString(36).slice(2,10),nowIso=()=>new Date().toISOString();
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let state=load(),sync={mode:'local'};
+function load(){try{let s=JSON.parse(localStorage.getItem(KEY));if(s&&s.stores){s.tempBoard=Array.isArray(s.tempBoard)?s.tempBoard:[];return s}}catch(e){}return {stores:[],sessions:[],tempBoard:[]}}
+function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1600)}
+function purge(){state.tempBoard=(state.tempBoard||[]).filter(x=>new Date(x.updatedAt||x.createdAt||0).getTime()+TTL>Date.now())}
+async function save(push=true){purge();localStorage.setItem(KEY,JSON.stringify(state));if(push&&sync.mode==='firebase')try{await sync.set(sync.ref(sync.db,'rooms/'+sync.room+'/state'),state)}catch(e){}}
+function currentStore(){return (state.stores||[]).find(x=>x.id===$('store').value)}
+function tenseiRows(){return (state.tempBoard||[]).filter(x=>x.type==='tensei2_shutter'&&x.storeId===$('store').value).sort((a,b)=>Number(a.machineNo)-Number(b.machineNo))}
+function remain(x){let m=Math.ceil((new Date(x.updatedAt||x.createdAt).getTime()+TTL-Date.now())/60000);return m>60?`${Math.floor(m/60)}時間${m%60}分`:`${Math.max(0,m)}分`}
+function judgeAbeshi(v){let n=Number(v);if(!Number.isFinite(n)||n<1||n>512)return {status:'check',label:'1〜512あべしを入力してください',mode:'判定不可'};let decisive=(n>=1&&n<=64)||(n>=129&&n<=192)||(n>=257&&n<=320)||(n>=385&&n<=512);if(decisive)return {status:'yes',label:`${n}あべし：モードA否定区間 → A以外`,mode:'A以外'};return {status:'check',label:`${n}あべし：Aを完全否定できない区間 → 要確認`,mode:'判定保留'}}
+function statusText(s){return s==='yes'?'シャッターあり':s==='no'?'シャッターなし':'要確認'}
+function colorClass(s){return s==='yes'?'red':s==='no'?'black':'white'}
+function renderJudge(){let j=judgeAbeshi($('abeshi').value);$('judge').className='judge '+(j.status==='yes'?'red':'white');$('judge').innerHTML=`<strong>${esc(j.label)}</strong><div class="muted" style="margin-top:4px">自動共有時：${j.status==='yes'?'赤（シャッターあり）':'白（要確認）'}</div>`}
+function renderStores(){let cur=$('store').value||state.currentStoreId||state.stores?.[0]?.id||'';$('store').innerHTML=(state.stores||[]).map(s=>`<option value="${s.id}" ${s.id===cur?'selected':''}>${esc(s.name)}</option>`).join('')||'<option value="">店舗なし</option>'}
+function renderBoard(){purge();let rows=tenseiRows();$('board').innerHTML=rows.length?rows.map(x=>`<div class="machine ${colorClass(x.status)}"><div class="no">${esc(x.machineNo)}番台</div><div class="tag">${statusText(x.status)}</div><div class="sub">${x.abeshi?esc(x.abeshi)+'あべし':''} ${x.mode?'/ '+esc(x.mode):''}</div><div class="sub">${x.who?'確認 '+esc(x.who)+' / ':''}${new Date(x.updatedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}</div>${x.memo?`<div class="sub">${esc(x.memo)}</div>`:''}<div class="sub">残り ${remain(x)}</div><button style="margin-top:8px;width:100%" onclick="selectMachine('${x.machineNo}')">この台を編集</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1">まだ共有情報はありません。</div>'}
+function render(){renderStores();renderJudge();renderBoard()}
+function getRecord(no){return state.tempBoard.find(x=>x.type==='tensei2_shutter'&&x.storeId===$('store').value&&String(x.machineNo)===String(no))}
+async function upsert(status,mode='',abeshi=null,reason='manual'){let no=$('machineNo').value.trim();if(!no)return toast('台番号を入力してください');if(!$('store').value)return toast('店舗を選択してください');let now=nowIso(),x=getRecord(no);let def=currentStore()?.layout?.find(d=>String(d.no)===String(no));let data={type:'tensei2_shutter',storeId:$('store').value,machineNo:no,model:def?.model||'北斗の拳 転生2',status,mode,abeshi:abeshi||null,who:$('who').value.trim(),memo:$('memo').value.trim(),reason,updatedAt:now};if(x)Object.assign(x,data);else state.tempBoard.push({id:uid(),createdAt:now,...data});await save();renderBoard();toast(`${no}番台：${statusText(status)}で共有しました`)}
+$('abeshi').oninput=renderJudge;$('store').onchange=renderBoard;
+$('sendAuto').onclick=async()=>{let n=Number($('abeshi').value),j=judgeAbeshi(n);if(n<1||n>512||!Number.isFinite(n))return toast('1〜512あべしを入力してください');await upsert(j.status,j.mode,n,'auto')};
+$('sendRed').onclick=()=>upsert('yes','A以外',Number($('abeshi').value)||null,'manual');
+$('sendBlack').onclick=()=>{let n=Number($('abeshi').value)||null;if(n&&n>512)return toast('黒の共有は512あべしまでで入力してください');upsert('no','A扱い',n,'manual')};
+$('sendWhite').onclick=()=>upsert('check','要確認',Number($('abeshi').value)||null,'manual');
+$('hit').onclick=async()=>{let no=$('machineNo').value.trim();if(!no)return toast('台番号を入力してください');let x=getRecord(no),now=nowIso(),def=currentStore()?.layout?.find(d=>String(d.no)===String(no));if(x)Object.assign(x,{status:'check',mode:'要確認',abeshi:null,memo:'当たり後リセット'+($('memo').value.trim()?' / '+$('memo').value.trim():''),who:$('who').value.trim(),reason:'hit',updatedAt:now,lastHitAt:now});else state.tempBoard.push({id:uid(),type:'tensei2_shutter',storeId:$('store').value,machineNo:no,model:def?.model||'北斗の拳 転生2',status:'check',mode:'要確認',abeshi:null,who:$('who').value.trim(),memo:'当たり後リセット',reason:'hit',createdAt:now,updatedAt:now,lastHitAt:now});await save();renderBoard();toast('当たり報告：白（要確認）へ戻しました')};
+window.selectMachine=no=>{let x=getRecord(no);$('machineNo').value=no;$('abeshi').value=x?.abeshi||'';$('who').value=x?.who||'';$('memo').value=x?.memo||'';renderJudge();window.scrollTo({top:0,behavior:'smooth'})};
+async function autoFirebase(){try{let sv=JSON.parse(localStorage.getItem(FBKEY)||'{}');if(!sv.config||!sv.room)return;let appm=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),authm=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),dbm=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js');let app=appm.initializeApp(sv.config,'tensei-'+Date.now()),auth=authm.getAuth(app);await authm.signInAnonymously(auth);let db=dbm.getDatabase(app),r=dbm.ref(db,'rooms/'+sv.room+'/state'),snap=await dbm.get(r);sync={mode:'firebase',db,room:sv.room,set:dbm.set,ref:dbm.ref};if(snap.exists()){state=snap.val();state.tempBoard=state.tempBoard||[];localStorage.setItem(KEY,JSON.stringify(state));render()}dbm.onValue(r,s=>{if(!s.exists())return;state=s.val();state.tempBoard=state.tempBoard||[];localStorage.setItem(KEY,JSON.stringify(state));render()});$('syncBadge').textContent='Firebase共有中';$('syncBadge').className='badge good'}catch(e){}}
+purge();render();autoFirebase();setInterval(async()=>{let b=state.tempBoard.length;purge();if(b!==state.tempBoard.length)await save();renderBoard()},60000);
+</script></body></html>
